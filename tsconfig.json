@@ -1,0 +1,3 @@
+{
+  "extends": "@filter-ts/config/tsconfig.base.json"
+}

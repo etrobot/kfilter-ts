@@ -1,0 +1,24 @@
+{
+  "name": "@filter-ts/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@filter-ts/db": "workspace:*",
+    "@filter-ts/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@filter-ts/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

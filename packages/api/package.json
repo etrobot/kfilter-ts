@@ -1,0 +1,26 @@
+{
+  "name": "@filter-ts/api",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@filter-ts/auth": "workspace:*",
+    "@filter-ts/db": "workspace:*",
+    "@filter-ts/env": "workspace:*",
+    "@trpc/client": "catalog:",
+    "@trpc/server": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@filter-ts/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
