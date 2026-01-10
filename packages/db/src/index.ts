@@ -1,4 +1,4 @@
-import { env } from "@filter-ts/env/server";
+import { env } from "@kfilter-ts/env/server";
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 
@@ -9,3 +9,5 @@ const client = createClient({
 });
 
 export const db = drizzle({ client, schema });
+
+export * from "./schema";

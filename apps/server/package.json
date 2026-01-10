@@ -10,10 +10,10 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
-    "@filter-ts/api": "workspace:*",
-    "@filter-ts/auth": "workspace:*",
-    "@filter-ts/db": "workspace:*",
-    "@filter-ts/env": "workspace:*",
+    "@kfilter-ts/api": "workspace:*",
+    "@kfilter-ts/auth": "workspace:*",
+    "@kfilter-ts/db": "workspace:*",
+    "@kfilter-ts/env": "workspace:*",
     "@hono/trpc-server": "^0.4.0",
     "@trpc/server": "catalog:",
     "better-auth": "catalog:",
@@ -22,7 +22,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@filter-ts/config": "workspace:*",
+    "@kfilter-ts/config": "workspace:*",
     "@types/bun": "catalog:",
     "tsdown": "^0.16.5",
     "typescript": "catalog:"

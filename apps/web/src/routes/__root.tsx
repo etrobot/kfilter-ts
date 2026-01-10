@@ -22,11 +22,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "filter-ts",
+        title: "kfilter-ts",
       },
       {
         name: "description",
-        content: "filter-ts is a web application",
+        content: "kfilter-ts is a web application",
       },
     ],
     links: [

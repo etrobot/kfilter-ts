@@ -1,5 +1,5 @@
 {
-  "name": "@filter-ts/api",
+  "name": "@kfilter-ts/api",
   "type": "module",
   "exports": {
     ".": {
@@ -11,16 +11,17 @@
   },
   "scripts": {},
   "dependencies": {
-    "@filter-ts/auth": "workspace:*",
-    "@filter-ts/db": "workspace:*",
-    "@filter-ts/env": "workspace:*",
+    "@kfilter-ts/auth": "workspace:*",
+    "@kfilter-ts/db": "workspace:*",
+    "@kfilter-ts/env": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@filter-ts/config": "workspace:*",
+    "@kfilter-ts/config": "workspace:*",
     "typescript": "catalog:"
   }
 }

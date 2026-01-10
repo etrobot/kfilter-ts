@@ -13,9 +13,9 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "filter-ts",
-        short_name: "filter-ts",
-        description: "filter-ts - PWA Application",
+        name: "kfilter-ts",
+        short_name: "kfilter-ts",
+        description: "kfilter-ts - PWA Application",
         theme_color: "#0c0c0c",
       },
       pwaAssets: { disabled: false, config: true },
@@ -28,6 +28,6 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 3101,
   },
 });

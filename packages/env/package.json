@@ -1,5 +1,5 @@
 {
-  "name": "@filter-ts/env",
+  "name": "@kfilter-ts/env",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@filter-ts/config": "workspace:*",
+    "@kfilter-ts/config": "workspace:*",
     "@types/bun": "catalog:",
     "typescript": "catalog:"
   }

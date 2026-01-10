@@ -1,7 +1,7 @@
-import { createContext } from "@filter-ts/api/context";
-import { appRouter } from "@filter-ts/api/routers/index";
-import { auth } from "@filter-ts/auth";
-import { env } from "@filter-ts/env/server";
+import { createContext } from "@kfilter-ts/api/context";
+import { appRouter } from "@kfilter-ts/api/routers/index";
+import { auth } from "@kfilter-ts/auth";
+import { env } from "@kfilter-ts/env/server";
 import { trpcServer } from "@hono/trpc-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -36,4 +36,7 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
-export default app;
+export default {
+  port: 3100,
+  fetch: app.fetch,
+};

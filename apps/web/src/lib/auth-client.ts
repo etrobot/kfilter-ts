@@ -1,4 +1,4 @@
-import { env } from "@filter-ts/env/web";
+import { env } from "@kfilter-ts/env/web";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({

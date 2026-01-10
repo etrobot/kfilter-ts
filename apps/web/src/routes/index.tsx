@@ -24,7 +24,10 @@ const TITLE_TEXT = `
  `;
 
 function HomeComponent() {
-  const healthCheck = useQuery(trpc.healthCheck.queryOptions());
+  const healthCheck = useQuery({
+    queryKey: ["healthCheck"],
+    queryFn: () => trpc.healthCheck.query(),
+  });
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-2">

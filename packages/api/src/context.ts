@@ -1,6 +1,6 @@
 import type { Context as HonoContext } from "hono";
 
-import { auth } from "@filter-ts/auth";
+import { auth } from "@kfilter-ts/auth";
 
 export type CreateContextOptions = {
   context: HonoContext;

@@ -1,5 +1,5 @@
 {
-  "name": "@filter-ts/auth",
+  "name": "@kfilter-ts/auth",
   "type": "module",
   "exports": {
     ".": {
@@ -11,14 +11,15 @@
   },
   "scripts": {},
   "dependencies": {
-    "@filter-ts/db": "workspace:*",
-    "@filter-ts/env": "workspace:*",
+    "@kfilter-ts/db": "workspace:*",
+    "@kfilter-ts/env": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@filter-ts/config": "workspace:*",
+    "@kfilter-ts/config": "workspace:*",
     "typescript": "catalog:"
   }
 }
