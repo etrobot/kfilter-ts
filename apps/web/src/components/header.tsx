@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
-import { LayoutDashboard, Home, LineChart } from "lucide-react";
+import { LayoutDashboard, Home, LineChart, TrendingUp } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export default function Header() {
@@ -17,10 +17,11 @@ export default function Header() {
   const baseLinks = [
     { to: "/", label: "Home", icon: Home },
     { to: "/sentiment", label: "情绪看板", icon: LineChart },
+    { to: "/stocks", label: "股票列表", icon: TrendingUp },
   ] as const;
 
   // 只有admin用户才能看到dashboard链接
-  const adminLinks = session?.data?.user?.isAdmin 
+  const adminLinks = (session?.data?.user as any)?.isAdmin 
     ? [{ to: "/dashboard", label: "管理面板", icon: LayoutDashboard }]
     : [];
 

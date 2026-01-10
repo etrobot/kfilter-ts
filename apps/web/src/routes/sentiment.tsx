@@ -1,12 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowUpDown,
   Calendar as CalendarIcon,
   TrendingUp,
   LayoutGrid,
+  RefreshCw,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import { zhCN } from "date-fns/locale";
 
@@ -74,6 +75,30 @@ function SentimentPage() {
     queryKey: ["blockData", dateStr],
     queryFn: () => trpc.stock.getBlockData.query({ date: dateStr }),
   });
+
+  // 批量更新状态查询
+  const { data: updateStatus } = useQuery({
+    queryKey: ["batchUpdateStatus"],
+    queryFn: () => trpc.stock.getBatchUpdateStatus.query(),
+    refetchInterval: (query) => 
+      query.state.data?.isRunning ? 2000 : false, // 更新中时每2秒刷新
+  });
+
+  // 触发K线数据检查更新
+  const checkUpdateMutation = useMutation({
+    mutationFn: (dataDate: string) => trpc.stock.checkAndUpdateKLine.mutate({ dataDate }),
+  });
+
+  // 数据加载完成后，用返回数据的日期检查是否需要更新K线
+  useEffect(() => {
+    if (data && data.blocks.length > 0) {
+      // 使用 10jqka 返回的数据日期（取第一个 block 的 date）
+      const dataDate = data.blocks[0]?.date;
+      if (dataDate) {
+        checkUpdateMutation.mutate(dataDate);
+      }
+    }
+  }, [data]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -235,6 +260,15 @@ function SentimentPage() {
                   <span>上榜天数: <span className="font-medium text-foreground">{selectedBlockData.days}</span></span>
                 </>
               )}
+              {updateStatus?.isRunning && (
+                <>
+                  <span className="w-px h-3 bg-border" />
+                  <span className="flex items-center gap-1.5 text-orange-600">
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    K线更新中: {updateStatus.completed}/{updateStatus.total}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -294,7 +328,7 @@ function SentimentPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-mono font-medium">{stock.latest?.toFixed(2)}</TableCell>
-                        <TableCell className="text-right font-mono font-bold text-red-500">{stock.changeRate?.toFixed(2)}%</TableCell>
+                        <TableCell className="text-right font-mono font-bold text-red-700">{stock.changeRate?.toFixed(2)}%</TableCell>
                         <TableCell className="text-right">
                           <Badge
                             variant="secondary"
