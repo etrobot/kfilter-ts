@@ -139,6 +139,99 @@ async function fetchFromApi(date: string): Promise<ApiResponse> {
   }
 }
 
+// ============ 因子计算 ============
+
+// 计算动量因子：基于近期价格涨幅
+// 使用 5日、10日、20日涨幅加权计算
+function calculateMomentumFactor(daily: KLineData[]): number | null {
+  if (!daily || daily.length < 20) return null;
+
+  const sorted = [...daily].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  const latest = sorted[sorted.length - 1];
+  if (!latest) return null;
+  
+  const latestPrice = latest.close;
+  
+  // 计算不同周期的涨幅
+  const calcReturn = (daysAgo: number) => {
+    const idx = sorted.length - 1 - daysAgo;
+    if (idx < 0) return 0;
+    const oldPrice = sorted[idx]?.close;
+    if (!oldPrice || oldPrice === 0) return 0;
+    return (latestPrice - oldPrice) / oldPrice;
+  };
+  
+  const ret5 = calcReturn(5);
+  const ret10 = calcReturn(10);
+  const ret20 = calcReturn(20);
+  
+  // 加权平均：短期权重更高
+  const momentum = ret5 * 0.5 + ret10 * 0.3 + ret20 * 0.2;
+  
+  // 归一化到 0-100 分
+  return Math.max(0, Math.min(100, (momentum + 0.2) * 250));
+}
+
+// 计算支撑因子：基于当前价格相对近期低点的位置
+// 价格越接近支撑位，分数越高
+function calculateSupportFactor(daily: KLineData[]): number | null {
+  if (!daily || daily.length < 20) return null;
+
+  const sorted = [...daily].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  const latest = sorted[sorted.length - 1];
+  if (!latest) return null;
+  
+  const latestPrice = latest.close;
+  
+  // 取近20日数据
+  const recent20 = sorted.slice(-20);
+  
+  // 计算近20日最低价和最高价
+  const low20 = Math.min(...recent20.map(d => d.low));
+  const high20 = Math.max(...recent20.map(d => d.high));
+  
+  if (high20 === low20) return 50;
+  
+  // 计算当前价格在区间中的位置 (0-1)
+  const position = (latestPrice - low20) / (high20 - low20);
+  
+  // 支撑因子：越接近低点分数越高（表示有支撑）
+  // 但不能太低（可能破位），最佳位置在 0.1-0.3 区间
+  let supportScore: number;
+  if (position < 0.1) {
+    // 太接近低点，可能破位风险
+    supportScore = 40 + position * 300;
+  } else if (position < 0.3) {
+    // 最佳支撑区间
+    supportScore = 70 + (0.3 - position) * 150;
+  } else if (position < 0.5) {
+    // 中间区域
+    supportScore = 50 + (0.5 - position) * 100;
+  } else {
+    // 高位区域，支撑较弱
+    supportScore = 50 * (1 - position);
+  }
+  
+  return Math.max(0, Math.min(100, supportScore));
+}
+
+// 计算因子总分
+function calculateFactorScore(momentum: number | null, support: number | null): number | null {
+  if (momentum === null && support === null) return null;
+  
+  const m = momentum ?? 50;
+  const s = support ?? 50;
+  
+  // 动量和支撑各占50%权重
+  return m * 0.5 + s * 0.5;
+}
+
 // ============ 腾讯证券 K线数据 API ============
 
 type PeriodType = "daily" | "weekly" | "monthly";
@@ -214,19 +307,27 @@ async function batchUpdateAllStocksKLine(queryDate: Date): Promise<void> {
           fetchKLineFromQQ(stock.symbol, "daily")
         ]);
 
+        // 计算因子
+        const momentumFactor = calculateMomentumFactor(daily);
+        const supportFactor = calculateSupportFactor(daily);
+        const factorScore = calculateFactorScore(momentumFactor, supportFactor);
+
         const now = new Date();
         const existing = existingMap.get(stock.symbol);
 
         if (existing) {
           await db
             .update(stockInfo)
-            .set({ name: stock.name, daily,updatedAt: now })
+            .set({ name: stock.name, daily, momentumFactor, supportFactor, factorScore, updatedAt: now })
             .where(eq(stockInfo.symbol, stock.symbol));
         } else {
           await db.insert(stockInfo).values({
             symbol: stock.symbol,
             name: stock.name,
             daily,
+            momentumFactor,
+            supportFactor,
+            factorScore,
             // weekly,
             // monthly,
             updatedAt: now,
@@ -637,6 +738,11 @@ export const stockRouter = router({
         // fetchKLineFromQQ(symbol, "monthly"),
       ]);
 
+      // 计算因子
+      const momentumFactor = calculateMomentumFactor(daily);
+      const supportFactor = calculateSupportFactor(daily);
+      const factorScore = calculateFactorScore(momentumFactor, supportFactor);
+
       // 更新或插入数据库
       const stockName = name || stock?.name || symbol;
 
@@ -646,6 +752,9 @@ export const stockRouter = router({
           .set({
             name: stockName,
             daily,
+            momentumFactor,
+            supportFactor,
+            factorScore,
             // weekly,
             // monthly,
             updatedAt: now,
@@ -656,6 +765,9 @@ export const stockRouter = router({
           symbol,
           name: stockName,
           daily,
+          momentumFactor,
+          supportFactor,
+          factorScore,
           // weekly,
           // monthly,
           updatedAt: now,
@@ -670,6 +782,9 @@ export const stockRouter = router({
         daily,
         weekly: stock?.weekly ?? null,
         monthly: stock?.monthly ?? null,
+        momentumFactor,
+        supportFactor,
+        factorScore,
         updatedAt: now,
         createdAt: stock?.createdAt ?? now,
         fromCache: false,
@@ -698,6 +813,9 @@ export const stockRouter = router({
             change5d: null,
             change30d: null,
             change250d: null,
+            momentumFactor: stock.momentumFactor,
+            supportFactor: stock.supportFactor,
+            factorScore: stock.factorScore,
             updatedAt: stock.updatedAt,
           };
         }
@@ -719,6 +837,9 @@ export const stockRouter = router({
             change5d: null,
             change30d: null,
             change250d: null,
+            momentumFactor: stock.momentumFactor,
+            supportFactor: stock.supportFactor,
+            factorScore: stock.factorScore,
             updatedAt: stock.updatedAt,
           };
         }
@@ -741,6 +862,9 @@ export const stockRouter = router({
           change5d: calcChange(5),
           change30d: calcChange(30),
           change250d: calcChange(250),
+          momentumFactor: stock.momentumFactor,
+          supportFactor: stock.supportFactor,
+          factorScore: stock.factorScore,
           updatedAt: stock.updatedAt,
         };
       });

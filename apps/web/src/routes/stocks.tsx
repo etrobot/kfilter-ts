@@ -22,7 +22,7 @@ export const Route = createFileRoute("/stocks")({
   component: StocksPage,
 });
 
-type SortField = "name" | "symbol" | "block" | "change1d" | "change5d" | "change30d" | "change250d";
+type SortField = "name" | "symbol" | "block" | "change1d" | "change5d" | "change30d" | "change250d" | "momentumFactor" | "supportFactor" | "factorScore";
 type SortOrder = "asc" | "desc";
 
 function StocksPage() {
@@ -81,6 +81,26 @@ function StocksPage() {
           {value > 0 ? "+" : ""}{value.toFixed(2)}%
         </span>
       </div>
+    );
+  };
+
+  const renderFactorCell = (value: number | null) => {
+    if (value === null) return <span className="text-muted-foreground">-</span>;
+    
+    const isHigh = value >= 70;
+    const isMedium = value >= 40 && value < 70;
+    
+    return (
+      <span
+        className={cn(
+          "font-mono font-semibold",
+          isHigh && "text-red-700",
+          isMedium && "text-amber-600",
+          !isHigh && !isMedium && "text-muted-foreground"
+        )}
+      >
+        {value.toFixed(1)}
+      </span>
     );
   };
 
@@ -144,9 +164,24 @@ function StocksPage() {
                           近30天 <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </TableHead>
-                      <TableHead className="text-right cursor-pointer h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground pr-6" onClick={() => handleSort("change250d")}>
+                      <TableHead className="text-right cursor-pointer h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => handleSort("change250d")}>
                         <div className="flex items-center justify-end gap-1 hover:text-foreground transition-colors group">
                           近250天 <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right cursor-pointer h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => handleSort("momentumFactor")}>
+                        <div className="flex items-center justify-end gap-1 hover:text-foreground transition-colors group">
+                          动量 <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right cursor-pointer h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground" onClick={() => handleSort("supportFactor")}>
+                        <div className="flex items-center justify-end gap-1 hover:text-foreground transition-colors group">
+                          支撑 <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </TableHead>
+                      <TableHead className="text-right cursor-pointer h-12 text-xs font-semibold uppercase tracking-wider text-muted-foreground pr-6" onClick={() => handleSort("factorScore")}>
+                        <div className="flex items-center justify-end gap-1 hover:text-foreground transition-colors group">
+                          总分 <ArrowUpDown className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </TableHead>
                     </TableRow>
@@ -161,7 +196,10 @@ function StocksPage() {
                           <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
                           <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
-                          <TableCell className="pr-6"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
+                          <TableCell className="pr-6"><Skeleton className="h-4 w-12 ml-auto" /></TableCell>
                         </TableRow>
                       ))
                     ) : (
@@ -187,13 +225,16 @@ function StocksPage() {
                           <TableCell className="text-right">{renderChangeCell(stock.change1d)}</TableCell>
                           <TableCell className="text-right">{renderChangeCell(stock.change5d)}</TableCell>
                           <TableCell className="text-right">{renderChangeCell(stock.change30d)}</TableCell>
-                          <TableCell className="text-right pr-6">{renderChangeCell(stock.change250d)}</TableCell>
+                          <TableCell className="text-right">{renderChangeCell(stock.change250d)}</TableCell>
+                          <TableCell className="text-right">{renderFactorCell(stock.momentumFactor)}</TableCell>
+                          <TableCell className="text-right">{renderFactorCell(stock.supportFactor)}</TableCell>
+                          <TableCell className="text-right pr-6">{renderFactorCell(stock.factorScore)}</TableCell>
                         </TableRow>
                       ))
                     )}
                     {sortedStocks.length === 0 && !isLoading && (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                        <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
                           <div className="flex flex-col items-center gap-2">
                             <div className="p-3 bg-muted rounded-full">
                               <TrendingUp className="h-6 w-6 opacity-40" />

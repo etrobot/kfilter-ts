@@ -59,6 +59,9 @@ export const stockInfo = sqliteTable(
     daily: text("daily", { mode: "json" }).$type<KLineData[]>(), // 日K线数据数组
     weekly: text("weekly", { mode: "json" }).$type<KLineData[]>(), // 周K线数据数组
     monthly: text("monthly", { mode: "json" }).$type<KLineData[]>(), // 月K线数据数组
+    momentumFactor: real("momentum_factor"), // 动量因子
+    supportFactor: real("support_factor"), // 支撑因子
+    factorScore: real("factor_score"), // 因子总分
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
       .$onUpdate(() => new Date())
